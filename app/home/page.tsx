@@ -4,19 +4,11 @@ import { getUserAndProfile, getDashboardData, type Profile } from '../action'
 
 export default async function HomePage() {
     const result = await getUserAndProfile();
-    const res = await fetch('http://localhost:3000/api/user', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        cache: 'no-store',
-    });
-    console.log(res);
+
     if (!result.ok) {
         return (
             <main className="max-w-3xl mx-auto py-10 px-4">
                 <div className="mb-4 p-4 bg-red-100 text-red-800 rounded">
-                    <p>not working</p>
                     {result.message ?? 'Unable to load user.'}
                 </div>
             </main>
@@ -43,7 +35,7 @@ export default async function HomePage() {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                         <div className="flex items-center gap-6">
                             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white font-bold text-2xl flex items-center justify-center border-4 border-white shadow-lg">
-                                {profile?.full_name?.slice(0, 2).toUpperCase()}
+                                {profile?.full_name?.slice(0,2).toUpperCase()}
                             </div>
                             <div>
                                 <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Welcome back{profile?.full_name ? `, ${profile.full_name}` : ''}!</h2>
