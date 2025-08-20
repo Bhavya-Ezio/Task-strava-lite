@@ -1,71 +1,40 @@
-'use client'
+'use server'
+import { redirect } from 'next/navigation'
+import { getUserAndProfile, getDashboardData, type Profile } from '../action'
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { type Profile, type DashboardDataResult, type UserAndProfileResult, getUserAndDashboard } from '../action';
-
-export default function HomePage() {
-    const router = useRouter();
-    const [loading, setLoading] = useState(true);
-    const [userData, setUserData] = useState<UserAndProfileResult | null>(null);
-    const [dashboard, setDashboard] = useState<DashboardDataResult | null>(null);
-
-    useEffect(() => {
-        let mounted = true;
-
-        (async () => {
-            try {
-                if (!mounted) return;
-
-                const result = await getUserAndDashboard();
-
-                if (!result.ok) {
-                    // console.error(result.message);
-                    // router.push("/login");
-                    console.log(result)
-                    setUserData({ ok: false, message: result.message });
-                } else {
-                    setUserData({ ok: true, user: result.user, profile: result.profile });
-                }
-            } catch (e) {
-                console.error(e);
-                setUserData({
-                    ok: false,
-                    message: e instanceof Error ? "error: " + e.message : "Unexpected error.",
-                });
-            } finally {
-                if (mounted) setLoading(false);
-            }
-        })();
-
-        return () => {
-            mounted = false;
-        };
-    }, [router]);
-
-    if (loading) {
-        return (
-            <main className="max-w-3xl mx-auto py-10 px-4">
-                <div className="text-slate-700 dark:text-slate-300">Loading…</div>
-            </main>
-        );
-    }
-
-    if (!userData?.ok) {
+export default async function HomePage() {
+    const result = await getUserAndProfile();
+    const res = await fetch('http://localhost:3000/api/user', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+    });
+    console.log(res);
+    if (!result.ok) {
         return (
             <main className="max-w-3xl mx-auto py-10 px-4">
                 <div className="mb-4 p-4 bg-red-100 text-red-800 rounded">
-                    {userData?.message ? "error: " + userData.message : 'Unable to load user.'}
+                    <p>not working</p>
+                    {result.message ?? 'Unable to load user.'}
                 </div>
             </main>
         );
     }
 
-    const profile = userData.profile as Profile | null;
+    const id = result.userId;
+    const profile = result.profile as Profile | null;
+
+    if (id && (!profile || !profile.full_name || profile.full_name === '')) {
+        redirect(`/${id}/profile`);
+    }
+
+    const dashboard = await getDashboardData(id ?? null);
 
     return (
         <main className="container mx-auto py-10 px-4">
-            <h1 className="text-4xl font-extrabold bg-clip-text text-transparent bg-white mb-6">
+            <h1 className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-cyan-400 to-emerald-400 mb-6">
                 Strava-Lite Dashboard
             </h1>
 
@@ -78,7 +47,7 @@ export default function HomePage() {
                             </div>
                             <div>
                                 <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Welcome back{profile?.full_name ? `, ${profile.full_name}` : ''}!</h2>
-                                <p className="text-slate-700 dark:text-slate-300">{userData.user?.email}</p>
+                                <p className="text-slate-700 dark:text-slate-300">{result.user?.email}</p>
                             </div>
                         </div>
                         <form action="#" className="self-start md:self-auto">
@@ -91,7 +60,7 @@ export default function HomePage() {
 
                 <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900">
                     <h3 className="text-xl font-bold mb-4 pl-5 relative text-slate-900 dark:text-slate-100 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-full before:bg-gradient-to-r from-orange-500 to-red-500 before:rounded">This Week&apos;s Progress</h3>
-                    {dashboard?.ok && dashboard.summary ? (
+                    {dashboard.ok && dashboard.summary ? (
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div className="p-6 rounded-xl bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-800 dark:to-slate-700 text-center border-2 border-transparent hover:border-orange-300 shadow transition">
                                 <div className="text-3xl font-extrabold text-orange-700 dark:text-orange-400 mb-1">{dashboard.summary.totalKm}</div>
@@ -116,7 +85,7 @@ export default function HomePage() {
                         <h3 className="text-xl font-bold pl-5 relative text-slate-900 dark:text-slate-100 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-full before:bg-gradient-to-r from-orange-500 to-red-500 before:rounded">Recent Activities</h3>
                         <a href="#" className="text-orange-600 dark:text-orange-400 font-semibold relative after:content-['→'] after:ml-2 hover:after:translate-x-1 transition">View All</a>
                     </div>
-                    {dashboard?.ok && dashboard.recent ? (
+                    {dashboard.ok && dashboard.recent ? (
                         <div className="flex flex-col gap-4">
                             {dashboard.recent.map((a) => (
                                 <div key={a.id} className="flex items-center justify-between p-5 bg-white dark:bg-slate-800 rounded-xl border-2 border-slate-100 dark:border-slate-700 shadow relative overflow-hidden hover:shadow-lg transition">
@@ -138,5 +107,5 @@ export default function HomePage() {
                 </div>
             </div>
         </main>
-    );
+    )
 }
