@@ -71,35 +71,45 @@ export type UserAndProfileResult = {
 };
 
 export async function getUserAndProfile(): Promise<UserAndProfileResult> {
+  // try {
+  //   const supabase = await createClient();
+
+  //   const { data: userData, error: userError } = await supabase.auth.getUser();
+  //   if (userError) {
+  //     return { ok: false, message: userError.message };
+  //   }
+
+  //   const user = userData.user ?? null;
+  //   const userId = user?.id ?? null;
+  //   if (!userId) {
+  //     return { ok: false, message: 'No active session.', user, userId: null };
+  //   }
+
+  //   const { data: profileRow, error: profileError } = await supabase
+  //     .from('profiles')
+  //     .select('id, full_name, bio')
+  //     .eq('id', userId)
+  //     .single();
+
+  //   if (profileError) {
+  //     return { ok: false, message: profileError.message, user, userId };
+  //   }
+
+  //   const profile: Profile | null = profileRow as Profile | null;
+
+  //   return { ok: true, user, userId, profile };
+  // } catch (err) {
+  //   return { ok: false, message: err instanceof Error ? err.message : 'Unexpected error.' };
+  // }
   try {
-    const supabase = await createClient();
-
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError) {
-      return { ok: false, message: userError.message };
-    }
-
-    const user = userData.user ?? null;
-    const userId = user?.id ?? null;
-    if (!userId) {
-      return { ok: false, message: 'No active session.', user, userId: null };
-    }
-
-    const { data: profileRow, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, full_name, bio')
-      .eq('id', userId)
-      .single();
-
-    if (profileError) {
-      return { ok: false, message: profileError.message, user, userId };
-    }
-
-    const profile: Profile | null = profileRow as Profile | null;
-
-    return { ok: true, user, userId, profile };
-  } catch (err) {
-    return { ok: false, message: err instanceof Error ? err.message : 'Unexpected error.' };
+    const res = await fetch('http://localhost:3000/api/user', {
+      credentials: 'include',
+    });
+    const data = await res.json();
+    console.log(data)
+    return data;
+  } catch (error) {
+    return { ok: false, message: "error fetching data" };
   }
 }
 

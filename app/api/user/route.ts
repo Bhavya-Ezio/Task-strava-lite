@@ -62,12 +62,10 @@ export type UserAndProfileResult = {
 
 export async function GET(): Promise<NextResponse<UserAndProfileResult>> {
   try {
-    const cookieStore = await cookies();
-	console.log(cookieStore)
-    const supabase = createClient(cookieStore); // Pass the cookies to the client creator
+    const supabase = await createClient(); // Pass the cookies to the client creator
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-
+	console.log(user)
     if (userError) {
       return NextResponse.json({ ok: false, message: userError.message }, { status: 401 });
     }

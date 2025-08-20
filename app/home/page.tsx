@@ -1,28 +1,33 @@
-'use server'
-import { redirect } from 'next/navigation'
-import { getUserAndProfile, getDashboardData, type Profile } from '../action'
+'use client'
 
-export default async function HomePage() {
-    const result = await getUserAndProfile();
+import { getUserAndProfile, getDashboardData,type Profile } from '../action';
+import { User } from "@supabase/supabase-js";
+import { useEffect, useState } from 'react';
+import { set } from 'zod';
 
-    if (!result.ok) {
-        return (
-            <main className="max-w-3xl mx-auto py-10 px-4">
-                <div className="mb-4 p-4 bg-red-100 text-red-800 rounded">
-                    {result.message ?? 'Unable to load user.'}
-                </div>
-            </main>
-        );
-    }
+export default function HomePage() {
 
-    const id = result.userId;
-    const profile = result.profile as Profile | null;
+    const [user, setUser] = useState<User | null>(null);
+    const [profile, setProfile] = useState<Profile | null>(null);
 
-    if (id && (!profile || !profile.full_name || profile.full_name === '')) {
-        redirect(`/${id}/profile`);
-    }
+    useEffect(() => {
+        async function fetchUser() {
+            try {
+                // const userRes = await getUserAndProfile();
+                // console.log(userRes);
+                const res = await fetch('http://localhost:3000/api/user', {
+                    credentials: 'include',
+                });
+                const userRes = await res.json();
+                setUser(userRes.user!);
+                setProfile(userRes.profile!);
+            } catch (err) {
+                console.error('Error fetching /api/user:', err);
+            }
+        }
+        fetchUser();
+    }, []);
 
-    const dashboard = await getDashboardData(id ?? null);
 
     return (
         <main className="container mx-auto py-10 px-4">
@@ -35,11 +40,11 @@ export default async function HomePage() {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                         <div className="flex items-center gap-6">
                             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-white font-bold text-2xl flex items-center justify-center border-4 border-white shadow-lg">
-                                {profile?.full_name?.slice(0,2).toUpperCase()}
+                                {profile?.full_name?.slice(0, 2).toUpperCase()}
                             </div>
                             <div>
                                 <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Welcome back{profile?.full_name ? `, ${profile.full_name}` : ''}!</h2>
-                                <p className="text-slate-700 dark:text-slate-300">{result.user?.email}</p>
+                                <p className="text-slate-700 dark:text-slate-300">{user?.email}</p>
                             </div>
                         </div>
                         <form action="#" className="self-start md:self-auto">
@@ -50,7 +55,7 @@ export default async function HomePage() {
                     </div>
                 </div>
 
-                <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900">
+                {/* <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900">
                     <h3 className="text-xl font-bold mb-4 pl-5 relative text-slate-900 dark:text-slate-100 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-full before:bg-gradient-to-r from-orange-500 to-red-500 before:rounded">This Week&apos;s Progress</h3>
                     {dashboard.ok && dashboard.summary ? (
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -96,7 +101,7 @@ export default async function HomePage() {
                     ) : (
                         <div className="text-slate-700 dark:text-slate-300">No recent activities.</div>
                     )}
-                </div>
+                </div> */}
             </div>
         </main>
     )
