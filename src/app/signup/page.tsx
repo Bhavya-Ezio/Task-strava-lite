@@ -1,10 +1,10 @@
 'use client';
 
-import { supabase } from '../../lib/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useToast } from '../../toast/ToastProvider';
+import { useToast } from '@/toast/ToastProvider';
 import { useRouter } from 'next/navigation';
 export default function SignupPage() {
     const router = useRouter();
