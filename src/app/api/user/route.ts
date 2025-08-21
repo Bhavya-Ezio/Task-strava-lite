@@ -12,9 +12,10 @@ export type Profile = {
 export type UserAndProfileResult = {
 	ok: boolean;
 	message?: string | null;
-	userId?: string | null;
-	user?: User | null;
-	profile?: Profile | null;
+	profile?: {
+		data: Profile | null,
+		id: string | null,
+	};
 };
 
 export async function GET(): Promise<NextResponse<UserAndProfileResult>> {
@@ -35,14 +36,13 @@ export async function GET(): Promise<NextResponse<UserAndProfileResult>> {
 			.select('id, full_name, bio')
 			.eq('id', user.id)
 			.single();
-
+		// console.log(profileRow)
 		if (profileError) {
 			return NextResponse.json({ ok: false, message: profileError.message }, { status: 500 });
 		}
 
 		const profile = profileRow as Profile | null;
-
-		return NextResponse.json({ ok: true, user, userId: user.id, profile }, { status: 200 });
+		return NextResponse.json({ ok: true, profile: { data: profile, id: user.id } }, { status: 200 });
 	} catch (err) {
 		const errorMessage = err instanceof Error ? err.message : 'Unexpected error.';
 		return NextResponse.json({ ok: false, message: errorMessage }, { status: 500 });

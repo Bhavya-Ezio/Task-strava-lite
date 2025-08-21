@@ -123,7 +123,11 @@ const ActivitiesPage = () => {
         return (
             <div className="space-y-4">
                 {paginatedActivities.map((activity) => (
-                    <div key={activity.id} className="bg-[#0D1321] p-4 rounded-xl transition-all duration-300 hover:bg-[#12182d] hover:shadow-lg hover:shadow-orange-500/10 flex items-center space-x-4">
+                    <div
+                        key={activity.id}
+                        className="bg-[#0D1321] p-4 rounded-xl transition-all duration-300 hover:bg-[#12182d] hover:shadow-lg hover:shadow-orange-500/10 flex items-center space-x-4"
+                        onClick={() => { window.location.href = `${activity.id}/activity` }}
+                    >
                         <div className={`p-3 rounded-lg ${activity.type === 'run' ? 'bg-emerald-900/50' : 'bg-blue-900/50'}`}>
                             {activity.type === 'run' ? <Footprints size={24} className="text-emerald-400" /> : <Bike size={24} className="text-blue-400" />}
                         </div>

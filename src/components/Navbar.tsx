@@ -3,12 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useUser } from "@/context/userContext";
 
 // --- MOCK USER DATA ---
 // In a real app, you'd get this from an authentication context or API
-const MOCK_USER = {
-    name: 'Alex',
-};
 
 // --- NAVIGATION LINKS ---
 const navLinks = [
@@ -20,6 +18,7 @@ const navLinks = [
 const Navbar = () => {
     const pathname = usePathname();
     const [greeting, setGreeting] = useState('');
+    const { user } = useUser();
 
     // Effect to set the greeting based on the time of day
     useEffect(() => {
@@ -34,8 +33,8 @@ const Navbar = () => {
     }, []);
 
     // Helper to get user initials for the avatar
-    const getInitials = (name: string) => {
-        return name.charAt(0).toUpperCase();
+    const getInitials = (name: string | null | undefined) => {
+        if (name) { return name.charAt(0).toUpperCase(); }
     };
 
     return (
@@ -67,11 +66,11 @@ const Navbar = () => {
                     <div className="flex items-center space-x-4">
                         <div className="text-right">
                             <p className="text-slate-300 text-md">{greeting},</p>
-                            <p className="font-bold text-white text-lg">{MOCK_USER.name}</p>
+                            <p className="font-bold text-white text-lg">{user?.data.full_name}</p>
                         </div>
                         <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-orange-500 to-red-600">
                             <span className="text-white font-bold text-xl">
-                                {getInitials(MOCK_USER.name)}
+                                {getInitials(user?.data.full_name)}
                             </span>
                         </div>
                     </div>

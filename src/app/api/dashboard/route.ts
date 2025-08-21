@@ -23,6 +23,7 @@ export async function GET() {
 
 		// Subtract 'diff' days
 		currDate.setDate(currDate.getDate() - diff);
+		currDate.setHours(0, 0, 0, 0)
 		const weeklyActivities = await supabase
 			.from("activities")
 			.select("type,distance_km,duration_min")
@@ -35,14 +36,13 @@ export async function GET() {
 			totalTime: 0,
 			topSport: 0
 		}
-		// console.log(weeklyActivities)
 		weeklyActivities.data?.forEach((activity) => {
 			weeklyReport.totalRun += activity.distance_km;
 			weeklyReport.totalTime += activity.duration_min / 60;
 			weeklyReport.topSport += activity.type === "run" ? -1 : 1;
 		})
 		return NextResponse.json(
-			{ ok: true, recent: recentActivities.data, summary: weeklyReport },
+			{ ok: true, recent: recentActivities.data, summary: weeklyReport, id: userId },
 			{ status: 200 }
 		);
 	} catch (err) {

@@ -6,6 +6,7 @@ import "./globals.css";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import ToastProvider from "../toast/ToastProvider";
+import { UserProvider } from "@/context/userContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,7 +44,9 @@ export default function RootLayout({
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.35, ease: "easeInOut" }}
             >
-              {children}
+              <UserProvider>
+                {children}
+              </UserProvider>
             </motion.div>
           </AnimatePresence>
         </ToastProvider>
