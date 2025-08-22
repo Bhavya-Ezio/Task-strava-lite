@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import type { User } from '@supabase/supabase-js';
 
 // Define the shape of the expected response.
 export type Profile = {

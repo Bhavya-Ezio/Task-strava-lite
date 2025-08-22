@@ -1,10 +1,9 @@
 "use client";
 
-import { Dashboard, type Profile } from "../app/action";
+import { Dashboard } from "../app/action";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow, isToday, isYesterday } from "date-fns";
-import { useUser } from "@/context/userContext";
 import { useActiveTab } from "@/context/activeTabContext";
 // import Navbar from "@/components/Navbar";
 
@@ -53,7 +52,6 @@ export default function HomePage() {
                             This Week&apos;s Progress
                         </h3>
                         <a
-                            href={`/report/${userId}`}
                             className="text-orange-400 text-xl font-semibold relative after:content-['→'] after:ml-2 after:transition after:translate-x-0 hover:after:translate-x-1 transition before:absolute before:left-0 before:bottom-0 before:w-full before:h-0.5 before:bg-orange-400 before:scale-x-0 hover:before:scale-x-100 before:origin-left before:transition-transform before:duration-300 before:rounded pb-0.5 overflow-hidden mr-5"
                             onClick={() => setActiveTab('report')}
                         >

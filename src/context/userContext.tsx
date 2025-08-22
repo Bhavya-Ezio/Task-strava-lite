@@ -2,13 +2,14 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Profile } from "@/app/action";
+import { Profile } from "../app/action";
 // import type { User } from "@supabase/supabase-js";
 
 // Define shape of our context
 type UserContextType = {
     user: Profile | null;
     loading: boolean;
+    setUser: (user: Profile | null) => void;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -48,7 +49,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }, [router]);
 
     return (
-        <UserContext.Provider value={{ user, loading }}>
+        <UserContext.Provider value={{ user, loading, setUser }}>
             {children}
         </UserContext.Provider>
     );

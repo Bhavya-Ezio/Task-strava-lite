@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useToast } from "@/toast/ToastProvider";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { updateProfile, type UpdateProfileResult } from "@/app/action";
+import { updateProfile, type UpdateProfileResult } from "../../action";
 
 type UserProfile = {
     id: string;

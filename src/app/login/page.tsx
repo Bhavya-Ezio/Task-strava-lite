@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { signIn, type SignInResult } from '@/app/action';
+import { useUser } from '@/context/userContext';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -15,19 +16,21 @@ export default function LoginPage() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const { showToast } = useToast();
     const router = useRouter();
+    const { setUser } = useUser();
 
     const [state, formAction] = useActionState<SignInResult, FormData>(signIn, { ok: false, message: null });
 
     useEffect(() => {
         if (!state) return;
-        if (state.ok) {
+        if (state.ok && state.user) {
             showToast({ variant: 'success', title: 'Signed in', message: state.message ?? 'Welcome back!' });
-            router.push('/home');
+            setUser(state.user);
+            router.replace('/');
         } else if (state.message) {
             setErrorMessage(state.message);
             showToast({ variant: 'error', title: 'Sign in failed', message: state.message });
         }
-    }, [state, router, showToast]);
+    }, [state, router, showToast, setUser]);
 
     function SubmitButton() {
         const { pending } = useFormStatus();
