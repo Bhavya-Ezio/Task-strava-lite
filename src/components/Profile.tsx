@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import {
-    Loader2, AlertTriangle, Mail, Calendar, BarChart2, Ruler, Clock, Zap, Edit, LogOut
-} from 'lucide-react';
+import { Loader2, AlertTriangle, Mail, Calendar, BarChart2, Ruler, Clock, Zap, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { logout } from '@/app/action';
 import { useRouter } from 'next/navigation'; // <-- Use next/navigation for app router
@@ -66,11 +64,13 @@ const ProfilePage = () => {
                 });
             }
         } catch (err) {
-            showToast({
-                variant: 'error',
-                title: 'Logout Failed',
-                message: 'Unable to log out. Please try again.',
-            });
+            {
+                if (err instanceof Error) showToast({
+                    variant: 'error',
+                    title: 'Logout Failed',
+                    message: 'Unable to log out. Please try again.',
+                });
+            }
         } finally {
             setLogoutPending(false);
         }
@@ -130,9 +130,6 @@ const ProfilePage = () => {
                         <div className="w-28 h-28 rounded-full flex items-center justify-center bg-gradient-to-br from-orange-500 to-red-600 text-4xl font-bold text-white">
                             {getInitials(name)}
                         </div>
-                        <button className="absolute bottom-0 right-0 w-9 h-9 bg-slate-700 rounded-full flex items-center justify-center hover:bg-slate-600 transition-colors border-2 border-black">
-                            <Edit size={16} />
-                        </button>
                     </div>
                     <div className="sm:ml-auto sm:order-2 w-1/10">
                         <button

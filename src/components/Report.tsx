@@ -6,7 +6,7 @@ import {
     Loader2, AlertTriangle, Calendar, BarChart2,
     TrendingUp, TrendingDown, Minus, Clock, Ruler, Trophy, Brain
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useUser } from '@/context/userContext';
 
 // --- TYPE DEFINITION (matches API response) ---
@@ -53,8 +53,12 @@ const WeeklyReportPage = () => {
                 if (!response.ok) throw new Error('Could not fetch weekly report.');
                 const data = await response.json();
                 setReport(data);
-            } catch (err: any) {
-                setError(err.message);
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError('An unknown error occurred.');
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -82,12 +86,51 @@ const WeeklyReportPage = () => {
     const { summaryMetrics, goalProgress, weeklyActivities, insights, comparisonToLastWeek, dateRange } = report;
     const goalPercentage = Math.min((goalProgress.current / goalProgress.goal) * 100, 100);
 
-    // Prepare data for the chart
-    const chartData = weeklyActivities.map(act => ({
-        name: new Date(act.date).toLocaleDateString('en-US', { weekday: 'short' }),
-        distance: act.distance,
-        type: act.type,
-    }));
+    // --- Prepare data for the chart: ensure all days of week are present, sum distances, and show zero if no activity ---
+    // Get the start date of the week (assume dateRange.start is the first day of the week)
+    const weekStart = new Date(dateRange.start);
+    // Build an array of all 7 days in the week
+    const daysOfWeek = Array.from({ length: 7 }).map((_, i) => {
+        const d = new Date(weekStart);
+        d.setDate(weekStart.getDate() + i);
+        return d;
+    });
+
+    // Aggregate activities by day
+    type DayAgg = {
+        name: string; // e.g. 'Mon'
+        distance: number;
+        type: 'run' | 'ride' | null; // null if no activity, or 'run'/'ride' if only one type, or 'mixed' if both
+        runDistance: number;
+        rideDistance: number;
+    };
+
+    // For each day, sum distances for run and ride
+    const dayAggs: DayAgg[] = daysOfWeek.map((date) => {
+        const dayShort = date.toLocaleDateString('en-US', { weekday: 'short' });
+        const dayISO = date.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+        // Find all activities for this day
+        const acts = weeklyActivities.filter(act => {
+            // Compare only date part
+            return act.date.slice(0, 10) === dayISO;
+        });
+        const runDistance = acts.filter(a => a.type === 'run').reduce((sum, a) => sum + a.distance, 0);
+        const rideDistance = acts.filter(a => a.type === 'ride').reduce((sum, a) => sum + a.distance, 0);
+        let type: 'run' | 'ride' | null = null;
+        if (runDistance > 0 && rideDistance === 0) type = 'run';
+        else if (rideDistance > 0 && runDistance === 0) type = 'ride';
+        else if (runDistance > 0 && rideDistance > 0) type = null; // mixed
+        return {
+            name: dayShort,
+            distance: runDistance + rideDistance,
+            type,
+            runDistance,
+            rideDistance,
+        };
+    });
+
+    // For chart, show stacked bars for run and ride, or single bar if only one type
+    // We'll use two bars: runDistance and rideDistance, with different colors
 
     return (
         <div className="bg-black text-white min-h-screen px-2 sm:px-4 lg:px-6">
@@ -112,15 +155,39 @@ const WeeklyReportPage = () => {
                     <h2 className="text-2xl font-bold flex items-center gap-3 mb-4"><BarChart2 /> Activity Breakdown</h2>
                     <div style={{ width: '100%', height: 300 }}>
                         <ResponsiveContainer>
-                            <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                            <BarChart data={dayAggs} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                                 <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} tickLine={false} axisLine={false} />
                                 <YAxis stroke="#ffffff" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}km`} />
-                                <Tooltip cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} contentStyle={{ background: '#0A0F24', border: '1px solid #334155', borderRadius: '0.5rem' }} />
-                                <Bar dataKey="distance" radius={[4, 4, 0, 0]}>
-                                    {chartData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.type === 'run' ? '#34D399' : '#60A5FA'} />
-                                    ))}
-                                </Bar>
+                                <Tooltip
+                                    cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }}
+                                    contentStyle={{
+                                        background: '#1e293b',
+                                        border: '1px solid #fbbf24',
+                                        borderRadius: '0.5rem',
+                                        color: '#fff',
+                                        boxShadow: '0 2px 8px 0 rgba(0,0,0,0.15)',
+                                    }}
+                                    itemStyle={{
+                                        color: '#fff',
+                                        fontWeight: 500,
+                                        fontSize: 16,
+                                    }}
+                                    labelStyle={{
+                                        color: '#fbbf24',
+                                        fontWeight: 700,
+                                        fontSize: 18,
+                                    }}
+                                    formatter={(value: number, name: string) => {
+                                        // Fix: Use correct label for each bar
+                                        let label = '';
+                                        if (name === 'runDistance') label = 'Run';
+                                        else if (name === 'rideDistance') label = 'Ride';
+                                        else label = name;
+                                        return [`${value} km`, label];
+                                    }}
+                                />
+                                <Bar dataKey="runDistance" stackId="a" radius={[4, 4, 0, 0]} fill="#34D399" name="Run" />
+                                <Bar dataKey="rideDistance" stackId="a" radius={[4, 4, 0, 0]} fill="#60A5FA" name="Ride" />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

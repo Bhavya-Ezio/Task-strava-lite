@@ -1,18 +1,22 @@
 "use client";
 
 import { Dashboard } from "../app/action";
-import { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow, isToday, isYesterday } from "date-fns";
 import { useActiveTab } from "@/context/activeTabContext";
 import { Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useRef } from "react";
+
+const AiSuggestion = dynamic(() => import("./Suggestion"), { ssr: false });
 
 export default function HomePage() {
-    const [userId, setUserId] = useState<User | null>(null);
     const [dashboard, setDashboard] = useState<Dashboard | null>(null);
     const [loading, setLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
     const { setActiveTab } = useActiveTab();
+    const [showSuggestion, setShowSuggestion] = useState(false);
+    const suggestionButtonRef = useRef<HTMLButtonElement | null>(null);
 
     useEffect(() => {
         setMounted(true);
@@ -23,7 +27,6 @@ export default function HomePage() {
                 });
                 const dashboardRes = await dashRes.json();
                 setDashboard(dashboardRes);
-                setUserId(dashboardRes.id);
             } catch (err) {
                 console.error("Error fetching data", err);
             } finally {
@@ -43,7 +46,7 @@ export default function HomePage() {
     if (!mounted) return null; // 🚫 avoids hydration mismatch
 
     return (
-        <main className="container bg-black mx-auto px-2 sm:px-4 lg:px-6 ">
+        <main className="container bg-black mx-auto px-2 sm:px-4 lg:px-6 relative min-h-screen">
             <div className="space-y-6">
                 {/* ---------- Dashboard Summary ---------- */}
                 <div className="py-10 px-20 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900">
@@ -149,6 +152,42 @@ export default function HomePage() {
                     )}
                 </div>
             </div>
+
+            {/* --- AI Suggestion Floating Button & Modal --- */}
+            <button
+                ref={suggestionButtonRef}
+                type="button"
+                aria-label="Get AI Suggestion"
+                className="fixed z-40 bottom-8 right-8 bg-orange-600 hover:bg-orange-700 text-white rounded-full shadow-lg shadow-orange-500/20 p-4 flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400"
+                onClick={() => setShowSuggestion(true)}
+            >
+                <span className="sr-only">Get AI Suggestion</span>
+                {/* Lucide BrainCircuit icon */}
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+            </button>
+
+            {/* Modal for AI Suggestion */}
+            {showSuggestion && (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm transition-all">
+                    <div className="relative w-full max-w-1/2 mx-auto mt-24 m-12 sm:rounded-xl sm:shadow-2xl sm:my-8">
+                        <div className="bg-[#0D1321] p-0 sm:p-6 rounded-t-xl sm:rounded-xl border border-slate-800 shadow-lg">
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    aria-label="Close"
+                                    className="text-slate-400 hover:text-orange-500 transition-colors text-2xl font-bold p-2"
+                                    onClick={() => setShowSuggestion(false)}
+                                >
+                                    &times;
+                                </button>
+                            </div>
+                            <AiSuggestion />
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

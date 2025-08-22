@@ -11,7 +11,7 @@ const activitySchema = z.object({
     title: z.string().min(1, "Title is required").max(100),
 });
 
-export async function POST(req) {
+export async function POST(req: Request) {
     try {
         const body = await req.json();
 

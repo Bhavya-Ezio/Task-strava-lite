@@ -1,22 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useToast } from "@/toast/ToastProvider";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { updateProfile, type UpdateProfileResult } from "../../action";
 
-type UserProfile = {
-    id: string;
-    full_name: string | null;
-    bio: string | null;
-};
-
 export default function ProfilePage() {
     const { id } = useParams();
     const userId = String(id);
-    const [profile, setProfile] = useState<UserProfile | null>(null);
     const { showToast } = useToast();
 
     const [state, formAction] = useActionState<UpdateProfileResult, FormData>(updateProfile, { ok: false, message: null });
@@ -25,7 +18,7 @@ export default function ProfilePage() {
         if (!state) return;
         if (state.ok) {
             showToast({ title: "Profile updated!", message: state.message ?? "Your profile details were saved successfully.", variant: "success" });
-            window.location.href = "/home";
+            window.location.href = "/";
         } else if (state.message) {
             showToast({ title: "Update failed", message: state.message, variant: "error" });
         }
@@ -63,7 +56,7 @@ export default function ProfilePage() {
                             name="full_name"
                             type="text"
                             placeholder="Your full name"
-                            defaultValue={profile?.full_name ?? ""}
+                            defaultValue={""}
                             className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                         />
                     </div>
@@ -77,7 +70,7 @@ export default function ProfilePage() {
                             name="bio"
                             rows={4}
                             placeholder="Tell others a bit about you"
-                            defaultValue={profile?.bio ?? ""}
+                            defaultValue={""}
                             className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                         />
                     </div>

@@ -27,7 +27,6 @@ export default function SignupPage() {
             } else {
                 setSent(true);
                 showToast({ variant: 'success', title: 'Sign up successful', message: 'Check your email to confirm your account.' });
-                // console.log(data)
                 if (data.user) {
                     router.push(`/login`);
                 }

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Footprints, Bike, Pencil, Trash2, Search, BarChart2, Loader2, AlertTriangle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Footprints, Bike, Pencil, Search, BarChart2, Loader2, AlertTriangle, ArrowRight } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import { useToast } from '@/toast/ToastProvider';
 
@@ -74,10 +74,12 @@ const ActivitiesPage = () => {
             const data = await response.json();
             setActivities(data.items);
             setTotalActivities(data.total);
-        } catch (err: any) {
-            setError(err.message || 'An unknown error occurred.');
-            setActivities([]);
-            setTotalActivities(0);
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message || 'An unknown error occurred.');
+                setActivities([]);
+                setTotalActivities(0);
+            }
         } finally {
             setIsLoading(false);
         }

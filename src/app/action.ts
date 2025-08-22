@@ -1,11 +1,44 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { User } from '@supabase/supabase-js';
 
 export type ActionResult = {
   ok: boolean;
   message?: string | null;
   user?: Profile;
+};
+
+export type UpdateProfileResult = ActionResult;
+export async function updateProfile(_prev: UpdateProfileResult | undefined, formData: FormData): Promise<UpdateProfileResult> {
+  try {
+    const id = String(formData.get('id') ?? '').trim();
+    const full_name = (formData.get('full_name') as string | null)?.trim() ?? null;
+    const bio = (formData.get('bio') as string | null)?.trim() ?? null;
+
+    if (!id) {
+      return { ok: false, message: 'User id is required.' };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.from('profiles').upsert({ id, full_name, bio }, { onConflict: 'id' });
+
+    if (error) {
+      return { ok: false, message: error.message ?? 'Unable to update profile.' };
+    }
+
+    return { ok: true, message: 'Profile updated.' };
+  } catch (err) {
+    return { ok: false, message: err instanceof Error ? err.message : 'Unexpected error.' };
+  }
+}
+
+export type UserAndProfileResult = {
+  ok: boolean;
+  message?: string | null;
+  userId?: string | null;
+  user?: User | null;
+  profile?: Profile | null;
 };
 
 export type SignInResult = ActionResult;

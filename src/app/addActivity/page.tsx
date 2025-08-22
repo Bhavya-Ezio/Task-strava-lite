@@ -82,8 +82,12 @@ const AddActivityPage = () => {
             setActiveTab('activities');
             router.replace('/');
         } catch (err) {
+            let errorMessage = 'Failed to save activity.';
+            if (err instanceof Error && err.message) {
+                errorMessage = err.message;
+            }
             showToast({
-                message: 'Failed to save activity.',
+                message: errorMessage,
                 variant: 'error',
             });
             setIsSubmitting(false);
