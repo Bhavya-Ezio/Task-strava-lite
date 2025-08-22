@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+/* @next-codemod-ignore */
 import { NextResponse } from "next/server";
 import { type NextRequest } from "next/server";
 

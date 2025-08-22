@@ -7,19 +7,14 @@ import { Profile } from "@/app/action";
 
 // Define shape of our context
 type UserContextType = {
-    user: User | null;
+    user: Profile | null;
     loading: boolean;
-};
-
-type User = {
-    data: Profile;
-    id: string;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 

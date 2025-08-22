@@ -12,10 +12,7 @@ export type Profile = {
 export type UserAndProfileResult = {
 	ok: boolean;
 	message?: string | null;
-	profile?: {
-		data: Profile | null,
-		id: string | null,
-	};
+	profile?: Profile | null
 };
 
 export async function GET(): Promise<NextResponse<UserAndProfileResult>> {
@@ -42,7 +39,7 @@ export async function GET(): Promise<NextResponse<UserAndProfileResult>> {
 		}
 
 		const profile = profileRow as Profile | null;
-		return NextResponse.json({ ok: true, profile: { data: profile, id: user.id } }, { status: 200 });
+		return NextResponse.json({ ok: true, profile: profile }, { status: 200 });
 	} catch (err) {
 		const errorMessage = err instanceof Error ? err.message : 'Unexpected error.';
 		return NextResponse.json({ ok: false, message: errorMessage }, { status: 500 });

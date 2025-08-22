@@ -164,9 +164,8 @@ const ActivitiesPage = () => {
     };
 
     return (
-        <div className="bg-black text-white min-h-screen p-4 sm:p-6 lg:p-8">
-            <Navbar />
-            <div className="max-w-8xl mt-6 mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="bg-black text-white min-h-screen px-2 sm:px-4 lg:px-6">
+            <div className="max-w-8xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* --- LEFT COLUMN: STATS & FILTERS --- */}
                 <div className="lg:col-span-3 space-y-6">
                     <div className="bg-[#0D1321] p-5 rounded-xl">

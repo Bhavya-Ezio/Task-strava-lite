@@ -1,16 +1,19 @@
 "use client";
 
-import { Dashboard, type Profile } from "../action";
+import { Dashboard, type Profile } from "../app/action";
 import { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow, isToday, isYesterday } from "date-fns";
-import Navbar from "@/components/Navbar";
+import { useUser } from "@/context/userContext";
+import { useActiveTab } from "@/context/activeTabContext";
+// import Navbar from "@/components/Navbar";
 
 export default function HomePage() {
     const [userId, setUserId] = useState<User | null>(null);
     const [dashboard, setDashboard] = useState<Dashboard | null>(null);
     const [loading, setLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
+    const { setActiveTab } = useActiveTab();
 
     useEffect(() => {
         setMounted(true);
@@ -41,10 +44,8 @@ export default function HomePage() {
     if (!mounted) return null; // 🚫 avoids hydration mismatch
 
     return (
-        <main className="container mx-auto px-4 sm:p-6 lg:p-8 ">
-            <Navbar />
-
-            <div className="space-y-6 mt-5">
+        <main className="container bg-black mx-auto px-2 sm:px-4 lg:px-6 ">
+            <div className="space-y-6">
                 {/* ---------- Dashboard Summary ---------- */}
                 <div className="py-10 px-20 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900">
                     <div className="flex items-center justify-between mb-4">
@@ -53,7 +54,10 @@ export default function HomePage() {
                         </h3>
                         <a
                             href={`/report/${userId}`}
-                            className="text-orange-400 text-xl font-semibold relative after:content-['→'] after:ml-2 after:transition after:translate-x-0 hover:after:translate-x-1 transition before:absolute before:left-0 before:bottom-0 before:w-full before:h-0.5 before:bg-orange-400 before:scale-x-0 hover:before:scale-x-100 before:origin-left before:transition-transform before:duration-300 before:rounded pb-0.5 overflow-hidden mr-5">
+                            className="text-orange-400 text-xl font-semibold relative after:content-['→'] after:ml-2 after:transition after:translate-x-0 hover:after:translate-x-1 transition before:absolute before:left-0 before:bottom-0 before:w-full before:h-0.5 before:bg-orange-400 before:scale-x-0 hover:before:scale-x-100 before:origin-left before:transition-transform before:duration-300 before:rounded pb-0.5 overflow-hidden mr-5"
+                            onClick={() => setActiveTab('report')}
+                        >
+
                             View All
                         </a>
                     </div>
@@ -104,7 +108,13 @@ export default function HomePage() {
                 <div className="py-10 px-20 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-2xl font-bold pl-5 relative text-slate-900 dark:text-slate-100 before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-full before:rounded">Recent Activities</h3>
-                        <a href="/activities" className="text-orange-400 text-xl font-semibold relative after:content-['→'] after:ml-2 after:transition after:translate-x-0 hover:after:translate-x-1 transition before:absolute before:left-0 before:bottom-0 before:w-full before:h-0.5 before:bg-orange-400 before:scale-x-0 hover:before:scale-x-100 before:origin-left before:transition-transform before:duration-300 before:rounded pb-0.5 overflow-hidden mr-5"> View All </a>
+                        <a
+                            href="/activities"
+                            className="text-orange-400 text-xl font-semibold relative after:content-['→'] after:ml-2 after:transition after:translate-x-0 hover:after:translate-x-1 transition before:absolute before:left-0 before:bottom-0 before:w-full before:h-0.5 before:bg-orange-400 before:scale-x-0 hover:before:scale-x-100 before:origin-left before:transition-transform before:duration-300 before:rounded pb-0.5 overflow-hidden mr-5"
+                            onClick={() => setActiveTab('activities')}
+                        >
+                            View All
+                        </a>
                     </div>
                     {loading ? (
                         <div className="flex flex-col gap-4">
