@@ -1,9 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import { Profile } from "../app/action";
-// import type { User } from "@supabase/supabase-js";
 
 // Define shape of our context
 type UserContextType = {
@@ -17,36 +15,47 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
-    const router = useRouter();
 
     useEffect(() => {
         let active = true;
 
-        (async () => {
+        const fetchUserSession = async () => {
             try {
                 const res = await fetch("/api/user", { credentials: "include" });
-                const data = await res.json();
 
-                if (!data.ok || !data.profile) {
-                    router.replace("/login"); // redirect if no user
+                // If the response is not OK (e.g., 401 Unauthorized), there's no user.
+                if (!res.ok) {
+                    if (active) setUser(null);
                     return;
                 }
 
+                const data = await res.json();
+
+                // If the response is OK but there's no profile, there's no user.
+                if (!data.profile) {
+                    if (active) setUser(null);
+                    return;
+                }
+
+                // If we have a profile, set the user.
                 if (active) {
                     setUser(data.profile);
                 }
+
             } catch (err) {
-                console.error("Error fetching user:", err);
-                router.replace("/login");
+                console.error("Error fetching user session:", err);
+                if (active) setUser(null); // Assume no user on error
             } finally {
                 if (active) setLoading(false);
             }
-        })();
+        };
+
+        fetchUserSession();
 
         return () => {
             active = false;
         };
-    }, [router]);
+    }, []); // Removed router dependency
 
     return (
         <UserContext.Provider value={{ user, loading, setUser }}>

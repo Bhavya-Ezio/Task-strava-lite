@@ -1,14 +1,17 @@
 /* @next-codemod-ignore */
-import { NextResponse } from "next/server";
-import { type NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { startOfWeek, endOfWeek, subWeeks, formatISO } from "date-fns";
+import { createClient } from "@/lib/supabase/server";
+// import { z } from "zod";
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const { id } = params;
+
         if (!id) {
             return NextResponse.json({ error: "Missing activity id." }, { status: 400 });
         }
-
+        const supabase = await createClient();
         const data = {
             reportId: id,
             userId: 'user-123',
@@ -48,7 +51,117 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
                 avgDurationChange: -5,
             },
         }
-        return NextResponse.json(data);
+        // Calculate current and previous week ranges
+        const now = new Date();
+        const thisWeekStart = startOfWeek(now, { weekStartsOn: 1 }); // Monday
+        const thisWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
+        const lastWeekStart = subWeeks(thisWeekStart, 1);
+        const lastWeekEnd = subWeeks(thisWeekEnd, 1);
+
+        // Query current week activities
+        const { data: currentWeek, error: currentError } = await supabase
+            .from("activities")
+            .select("*")
+            .eq("user_id", id)
+            .gte("created_at", thisWeekStart.toISOString())
+            .lte("created_at", thisWeekEnd.toISOString())
+            .order("created_at", { ascending: true });
+
+        if (currentError) throw currentError;
+
+        // Query previous week activities
+        const { data: lastWeek, error: lastError } = await supabase
+            .from("activities")
+            .select("*")
+            .eq("user_id", id)
+            .gte("created_at", lastWeekStart.toISOString())
+            .lte("created_at", lastWeekEnd.toISOString());
+
+        if (lastError) throw lastError;
+
+        // ---- Helpers ----
+        const computeStats = (activities: any[]) => {
+            if (activities.length === 0) {
+                return {
+                    totalDistance: 0,
+                    totalActivities: 0,
+                    avgDistance: 0,
+                    avgSpeed: 0,
+                    avgDuration: 0,
+                    longestDistance: 0,
+                    longestDuration: 0,
+                };
+            }
+
+            const totalDistance = activities.reduce((sum, a) => sum + Number(a.distance_km || 0), 0);
+            const totalDuration = activities.reduce((sum, a) => sum + Number(a.duration_min || 0), 0);
+            const totalActivities = activities.length;
+            const longestDistance = Math.max(...activities.map(a => Number(a.distance_km || 0)));
+            const longestDuration = Math.max(...activities.map(a => Number(a.duration_min || 0)));
+
+            return {
+                totalDistance,
+                totalActivities,
+                avgDistance: totalDistance / totalActivities,
+                avgSpeed: totalDuration > 0 ? (totalDistance / (totalDuration / 60)) : 0, // km/h
+                avgDuration: totalDuration / totalActivities,
+                longestDistance,
+                longestDuration,
+            };
+        };
+
+        const thisWeekStats = computeStats(currentWeek);
+        const lastWeekStats = computeStats(lastWeek);
+
+        // WeeklyActivities with speed calc
+        const weeklyActivities = currentWeek.map(a => ({
+            id: a.id,
+            title: a.title,
+            type: a.type,
+            date: a.created_at,
+            distance: Number(a.distance_km),
+            duration: Number(a.duration_min),
+            speed: a.duration_min ? Number(a.distance_km) / (Number(a.duration_min) / 60) : 0,
+        }));
+
+        // Insights
+        const insights = {
+            mostActiveDay: currentWeek.length
+                ? new Date(currentWeek[0].created_at).toLocaleDateString("en-US", { weekday: "long" })
+                : "N/A",
+            fastestActivity: weeklyActivities.length
+                ? weeklyActivities.reduce((prev, curr) => (curr.speed > prev.speed ? curr : prev)).title
+                : "N/A",
+            consistency: `${thisWeekStats.totalActivities} activities this week`,
+        };
+
+        // Comparison
+        const comparisonToLastWeek = {
+            distanceChangePercent: lastWeekStats.totalDistance > 0
+                ? Number((((thisWeekStats.totalDistance - lastWeekStats.totalDistance) / lastWeekStats.totalDistance) * 100).toFixed(2))
+                : 100.00,
+            activitiesChangeCount: Number((thisWeekStats.totalActivities - lastWeekStats.totalActivities).toFixed(2)),
+            avgSpeedChange: Number((thisWeekStats.avgSpeed - lastWeekStats.avgSpeed).toFixed(2)),
+            avgDurationChange: Number((thisWeekStats.avgDuration - lastWeekStats.avgDuration).toFixed(2)),
+        };
+
+        // Final response
+        const report = {
+            reportId: crypto.randomUUID(),
+            id,
+            dateRange: {
+                start: formatISO(thisWeekStart),
+                end: formatISO(thisWeekEnd),
+            },
+            summaryMetrics: thisWeekStats,
+            goalProgress: { current: thisWeekStats.totalDistance, goal: 50 }, // Example: static goal = 50km
+            weeklyActivities,
+            insights,
+            comparisonToLastWeek,
+        };
+
+        return NextResponse.json(report, { status: 200 });
     } catch (err) {
         console.error("Unexpected error in GET /api/activities/[id]:", err);
         return NextResponse.json(

@@ -41,7 +41,7 @@ export default function Home() {
   const { activeTab } = useActiveTab();
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900">
+    <div className="min-h-auto bg-white dark:bg-slate-900">
       {/* <Navbar /> */}
       <div className="flex flex-col items-center mt-8">
         <div className="flex space-x-4 px-5">

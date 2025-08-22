@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
-import { Footprints, Bike, Pencil, Trash2, Search, BarChart2, Loader2, AlertTriangle } from 'lucide-react';
-import Pagination from '@/components/Pagination'; // Assuming Pagination component exists
-import Navbar from "@/components/Navbar";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { Footprints, Bike, Pencil, Trash2, Search, BarChart2, Loader2, AlertTriangle, ArrowRight, ArrowLeft } from 'lucide-react';
+import Pagination from '@/components/Pagination';
+import { useToast } from '@/toast/ToastProvider';
 
-// --- DATA TYPE ---
+// --- TYPE DEFINITIONS ---
 type Activity = {
     id: string;
     title: string | null;
@@ -18,7 +19,9 @@ type Activity = {
 const ITEMS_PER_PAGE = 10;
 
 // --- HELPER FUNCTIONS ---
-const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
 const calculatePace = (distance: number, duration: number) => {
     if (distance <= 0 || duration <= 0) return 'N/A';
     const pace = duration / distance;
@@ -26,6 +29,7 @@ const calculatePace = (distance: number, duration: number) => {
     const seconds = Math.round((pace - minutes) * 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')} /km`;
 };
+
 const calculateSpeed = (distance: number, duration: number) => {
     if (distance <= 0 || duration <= 0) return 'N/A';
     const speed = distance / (duration / 60);
@@ -34,65 +38,54 @@ const calculateSpeed = (distance: number, duration: number) => {
 
 // --- MAIN COMPONENT ---
 const ActivitiesPage = () => {
-    // --- STATE MANAGEMENT ---
-    const [allActivities, setAllActivities] = React.useState<Activity[]>([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [error, setError] = React.useState<string | null>(null);
+    const router = useRouter();
+    const { showToast } = useToast();
 
-    const [sportFilter, setSportFilter] = React.useState('All');
-    const [searchQuery, setSearchQuery] = React.useState('');
-    const [startDate, setStartDate] = React.useState('');
-    const [endDate, setEndDate] = React.useState('');
-    const [currentPage, setCurrentPage] = React.useState(1);
+    // --- STATE MANAGEMENT ---
+    const [activities, setActivities] = useState<Activity[]>([]);
+    const [totalActivities, setTotalActivities] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // State for filter controls
+    const [sportFilter, setSportFilter] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
 
     // --- DATA FETCHING ---
-    React.useEffect(() => {
-        const fetchActivities = async () => {
-            try {
-                setIsLoading(true);
-                setError(null);
-                const response = await fetch('/api/activities', { credentials: "include" });
-                const data = await response.json();
-                if (!response.ok) throw new Error('Failed to fetch activities.');
-                setAllActivities(data.data);
-            } catch (err: any) {
-                setError(err.message || 'An unknown error occurred.');
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const fetchActivities = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const params = new URLSearchParams({
+                page: String(currentPage),
+                pageSize: String(ITEMS_PER_PAGE),
+            });
+            if (searchQuery) params.set('search', searchQuery);
+            if (sportFilter !== 'all') params.set('sport', sportFilter);
+            if (startDate) params.set('from', startDate);
+            if (endDate) params.set('to', endDate);
+
+            const response = await fetch(`/api/activities?${params.toString()}`);
+            if (!response.ok) throw new Error('Failed to fetch activities.');
+
+            const data = await response.json();
+            setActivities(data.items);
+            setTotalActivities(data.total);
+        } catch (err: any) {
+            setError(err.message || 'An unknown error occurred.');
+            setActivities([]);
+            setTotalActivities(0);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [currentPage, searchQuery, sportFilter, startDate, endDate]);
+
+    useEffect(() => {
         fetchActivities();
-    }, []);
-
-    // --- FILTERING & PAGINATION LOGIC ---
-    const filteredActivities = React.useMemo(() => {
-        if (!Array.isArray(allActivities)) return [];
-        return allActivities.filter(activity => {
-            const activityDate = new Date(activity.created_at);
-            const sportMatch = sportFilter === 'All' || activity.type.toLowerCase() === sportFilter.toLowerCase();
-            const searchMatch = !searchQuery || activity.title?.toLowerCase().includes(searchQuery.toLowerCase());
-            const startMatch = !startDate || activityDate >= new Date(startDate);
-            const endMatch = !endDate || activityDate <= new Date(endDate);
-            return sportMatch && searchMatch && startMatch && endMatch;
-        });
-    }, [allActivities, sportFilter, searchQuery, startDate, endDate]);
-
-    const paginatedActivities = React.useMemo(() => {
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        return filteredActivities.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-    }, [currentPage, filteredActivities]);
-
-    React.useEffect(() => { setCurrentPage(1); }, [sportFilter, searchQuery, startDate, endDate]);
-
-    // --- EVENT HANDLERS ---
-    const handleDelete = (idToDelete: string) => {
-        const originalActivities = [...allActivities];
-        setAllActivities(current => current.filter(a => a.id !== idToDelete));
-        // Simulate API call and revert on failure
-        setTimeout(() => { if (Math.random() > 0.8) setAllActivities(originalActivities); }, 1500);
-    };
-
-    const handleEdit = (id: string) => alert(`Edit functionality for activity ${id}`);
+    }, [fetchActivities]);
 
     // --- RENDER LOGIC ---
     const renderContent = () => {
@@ -112,7 +105,7 @@ const ActivitiesPage = () => {
                 </div>
             );
         }
-        if (paginatedActivities.length === 0) {
+        if (activities.length === 0) {
             return (
                 <div className="text-center py-16 bg-[#0D1321] rounded-xl">
                     <h3 className="text-2xl font-semibold text-white">No Activities Found</h3>
@@ -122,14 +115,18 @@ const ActivitiesPage = () => {
         }
         return (
             <div className="space-y-4">
-                {paginatedActivities.map((activity) => (
+                {activities.map((activity) => (
                     <div
                         key={activity.id}
-                        className="bg-[#0D1321] p-4 rounded-xl transition-all duration-300 hover:bg-[#12182d] hover:shadow-lg hover:shadow-orange-500/10 flex items-center space-x-4"
-                        onClick={() => { window.location.href = `${activity.id}/activity` }}
+                        className="bg-[#0D1321] p-4 rounded-xl transition-all duration-300 hover:bg-[#12182d] hover:shadow-lg hover:shadow-orange-500/10 flex items-center space-x-4 cursor-pointer"
+                        onClick={() => router.push(`/${activity.id}/activity`)}
                     >
                         <div className={`p-3 rounded-lg ${activity.type === 'run' ? 'bg-emerald-900/50' : 'bg-blue-900/50'}`}>
-                            {activity.type === 'run' ? <Footprints size={24} className="text-emerald-400" /> : <Bike size={24} className="text-blue-400" />}
+                            {activity.type === 'run' ? (
+                                <Footprints size={24} className="text-emerald-400" />
+                            ) : (
+                                <Bike size={24} className="text-blue-400" />
+                            )}
                         </div>
                         <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                             <div>
@@ -148,13 +145,31 @@ const ActivitiesPage = () => {
                                 <div>
                                     <p className="text-slate-400">{activity.type === 'run' ? 'Pace' : 'Speed'}</p>
                                     <p className="font-semibold text-white">
-                                        {activity.type === 'run' ? calculatePace(activity.distance_km!, activity.duration_min!) : calculateSpeed(activity.distance_km!, activity.duration_min!)}
+                                        {activity.type === 'run'
+                                            ? calculatePace(activity.distance_km!, activity.duration_min!)
+                                            : calculateSpeed(activity.distance_km!, activity.duration_min!)}
                                     </p>
                                 </div>
                             </div>
                             <div className="flex items-center justify-end space-x-2">
-                                <button onClick={() => handleEdit(activity.id)} className="p-2 rounded-md hover:bg-slate-700 transition-colors"><Pencil size={18} className="text-slate-400" /></button>
-                                <button onClick={() => handleDelete(activity.id)} className="p-2 rounded-md hover:bg-red-900/50 transition-colors"><Trash2 size={18} className="text-red-500" /></button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        showToast({
+                                            message: 'Edit not implemented.',
+                                            variant: 'info',
+                                        });
+                                    }}
+                                    className="p-2 rounded-md hover:bg-slate-700 transition-colors"
+                                >
+                                    <Pencil size={18} className="text-slate-400" />
+                                </button>
+                                <button
+                                    className="p-2 rounded-md hover:bg-orange-900/50 transition-colors"
+                                    aria-label="Go to activity"
+                                >
+                                    <ArrowRight size={18} className="text-orange-400" />
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -164,17 +179,16 @@ const ActivitiesPage = () => {
     };
 
     return (
-        <div className="bg-black text-white min-h-screen px-2 sm:px-4 lg:px-6">
-            <div className="max-w-8xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* --- LEFT COLUMN: STATS & FILTERS --- */}
+        <div className="relative bg-black text-white min-h-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-3 space-y-6">
                     <div className="bg-[#0D1321] p-5 rounded-xl">
                         <div className="flex items-center space-x-3 mb-3">
                             <BarChart2 className="text-orange-500" />
                             <h2 className="text-xl font-bold">Stats</h2>
                         </div>
-                        <div className="text-4xl font-bold text-white">{filteredActivities.length}</div>
-                        <p className="text-slate-400">Matching Activities</p>
+                        <div className="text-4xl font-bold text-white">{totalActivities}</div>
+                        <p className="text-slate-400">Total Activities Found</p>
                     </div>
                     <div className="bg-[#0D1321] p-5 rounded-xl">
                         <div className="flex items-center space-x-3 mb-4">
@@ -182,25 +196,66 @@ const ActivitiesPage = () => {
                             <h2 className="text-xl font-bold">Filters</h2>
                         </div>
                         <div className="space-y-4">
-                            <input type="text" placeholder="Search by title..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-[#0A0F24] text-slate-300 border border-slate-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" />
-                            <select value={sportFilter} onChange={(e) => setSportFilter(e.target.value)} className="w-full bg-[#0A0F24] text-slate-300 border border-slate-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                <option>All</option><option>Run</option><option>Ride</option>
+                            <input
+                                type="text"
+                                placeholder="Search by title..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-[#0A0F24] text-slate-300 border border-slate-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            />
+                            <select
+                                value={sportFilter}
+                                onChange={(e) => setSportFilter(e.target.value)}
+                                className="w-full bg-[#0A0F24] text-slate-300 border border-slate-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            >
+                                <option value="all">All</option>
+                                <option value="run">Run</option>
+                                <option value="ride">Ride</option>
                             </select>
                             <div className="grid grid-cols-2 gap-2">
-                                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="bg-[#0A0F24] text-slate-400 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
-                                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="bg-[#0A0F24] text-slate-400 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={e => setStartDate(e.target.value)}
+                                    className="bg-[#0A0F24] text-slate-400 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                />
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={e => setEndDate(e.target.value)}
+                                    className="bg-[#0A0F24] text-slate-400 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                />
                             </div>
                         </div>
                     </div>
                 </div>
-
-                {/* --- RIGHT COLUMN: ACTIVITIES LIST --- */}
                 <div className="lg:col-span-9">
-                    {/* <h1 className="text-4xl font-bold mb-6">Activity History</h1> */}
+                    <h1 className="text-4xl font-bold mb-6">Activity History</h1>
                     {renderContent()}
-                    <Pagination totalItems={filteredActivities.length} itemsPerPage={ITEMS_PER_PAGE} currentPage={currentPage} onPageChange={setCurrentPage} />
+                    <Pagination
+                        totalItems={totalActivities}
+                        itemsPerPage={ITEMS_PER_PAGE}
+                        currentPage={currentPage}
+                        onPageChange={setCurrentPage}
+                    />
                 </div>
             </div>
+            {/* Add Activity Button - bottom right */}
+            <button
+                onClick={() => {
+                    // You can replace this with navigation or modal open logic
+                    if (typeof window !== "undefined") {
+                        window.location.href = "/addActivity";
+                    }
+                }}
+                className="fixed z-50 bottom-8 right-8 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg p-4 flex items-center gap-2 transition-colors"
+                aria-label="Add Activity"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="hidden sm:inline font-semibold">Add Activity</span>
+            </button>
         </div>
     );
 };

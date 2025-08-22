@@ -5,7 +5,7 @@ import { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow, isToday, isYesterday } from "date-fns";
 import { useActiveTab } from "@/context/activeTabContext";
-// import Navbar from "@/components/Navbar";
+import { Loader2 } from "lucide-react";
 
 export default function HomePage() {
     const [userId, setUserId] = useState<User | null>(null);
@@ -55,18 +55,12 @@ export default function HomePage() {
                             className="text-orange-400 text-xl font-semibold relative after:content-['→'] after:ml-2 after:transition after:translate-x-0 hover:after:translate-x-1 transition before:absolute before:left-0 before:bottom-0 before:w-full before:h-0.5 before:bg-orange-400 before:scale-x-0 hover:before:scale-x-100 before:origin-left before:transition-transform before:duration-300 before:rounded pb-0.5 overflow-hidden mr-5"
                             onClick={() => setActiveTab('report')}
                         >
-
                             View All
                         </a>
                     </div>
                     {loading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            {[...Array(3)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="h-24 rounded-xl animate-pulse bg-gray-700"
-                                ></div>
-                            ))}
+                        <div className="flex justify-center items-center h-40">
+                            <Loader2 size={48} className="animate-spin text-orange-500" />
                         </div>
                     ) : dashboard?.ok && dashboard.summary ? (
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -115,13 +109,8 @@ export default function HomePage() {
                         </a>
                     </div>
                     {loading ? (
-                        <div className="flex flex-col gap-4">
-                            {[...Array(3)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="h-20 rounded-xl animate-pulse bg-gray-700"
-                                ></div>
-                            ))}
+                        <div className="flex justify-center items-center h-40">
+                            <Loader2 size={48} className="animate-spin text-orange-500" />
                         </div>
                     ) : dashboard?.ok && dashboard.recent ? (
                         <div className=" flex flex-col gap-4">

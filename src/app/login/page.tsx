@@ -21,14 +21,57 @@ export default function LoginPage() {
     const [state, formAction] = useActionState<SignInResult, FormData>(signIn, { ok: false, message: null });
 
     useEffect(() => {
+        // Only run when state changes
         if (!state) return;
-        if (state.ok && state.user) {
-            showToast({ variant: 'success', title: 'Signed in', message: state.message ?? 'Welcome back!' });
-            setUser(state.user);
-            router.replace('/');
+
+        if (state.ok) {
+            // On successful sign in, fetch user profile and update context
+            (async () => {
+                try {
+                    // Use relative URL for API call (works in all environments)
+                    const res = await fetch('/api/user', {
+                        method: 'GET',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        cache: 'no-store',
+                    });
+                    const userRes = await res.json();
+
+                    if (userRes?.ok && userRes?.profile) {
+                        showToast({
+                            variant: 'success',
+                            title: 'Signed in',
+                            message: state.message ?? 'Welcome back!',
+                        });
+                        setUser(userRes.profile);
+                        router.replace('/');
+                    } else {
+                        setErrorMessage(userRes?.message || 'Failed to fetch user profile.');
+                        showToast({
+                            variant: 'error',
+                            title: 'Sign in failed',
+                            message: userRes?.message || 'Failed to fetch user profile.',
+                        });
+                    }
+                } catch (err) {
+                    const msg = err instanceof Error ? err.message : 'Unexpected error.';
+                    setErrorMessage(msg);
+                    showToast({
+                        variant: 'error',
+                        title: 'Sign in failed',
+                        message: msg,
+                    });
+                }
+            })();
         } else if (state.message) {
             setErrorMessage(state.message);
-            showToast({ variant: 'error', title: 'Sign in failed', message: state.message });
+            showToast({
+                variant: 'error',
+                title: 'Sign in failed',
+                message: state.message,
+            });
         }
     }, [state, router, showToast, setUser]);
 

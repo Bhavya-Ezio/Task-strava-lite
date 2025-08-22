@@ -122,7 +122,7 @@ const ProfilePage = () => {
     const { name, email, memberSince, allTimeStats } = profile;
 
     return (
-        <div className="bg-black text-white min-h-screen p-2 sm:p-4 lg:p-6">
+        <div className="bg-black text-white min-h-auto p-2 sm:p-4 lg:p-6">
             <div className="max-w-8xl mx-auto">
                 {/* --- HEADER --- */}
                 <header className="bg-gradient-to-br from-[#0D1321] to-[#0A0F24] p-8 rounded-xl mb-8 border border-slate-800 flex flex-col sm:flex-row items-center gap-6">

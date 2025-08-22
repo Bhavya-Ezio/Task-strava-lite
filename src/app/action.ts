@@ -24,24 +24,7 @@ export async function signIn(_prev: SignInResult | undefined, formData: FormData
     if (error) {
       return { ok: false, message: error.message ?? 'Invalid credentials.' };
     }
-
-    // Cookies are handled by @supabase/ssr via server client
-    // After successful sign in, fetch the user from backend API /api/user
-    try {
-      const res = await fetch('https://localhost:3000/api/user', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        cache: 'no-store',
-      });
-      const userRes = await res.json();
-
-      return { ok: true, message: 'Welcome back!', user: userRes?.profile };
-    } catch (err) {
-      return { ok: false, message: err instanceof Error ? err.message : 'Unexpected error.' };
-    }
+    return { ok: true, message: "Signin completed" };
   } catch (err) {
     return { ok: false, message: err instanceof Error ? err.message : 'Unexpected error.' };
   }

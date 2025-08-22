@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-    ArrowLeft, Loader2, AlertTriangle, Calendar, BarChart2,
+    Loader2, AlertTriangle, Calendar, BarChart2,
     TrendingUp, TrendingDown, Minus, Clock, Ruler, Trophy, Brain
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -114,7 +114,7 @@ const WeeklyReportPage = () => {
                         <ResponsiveContainer>
                             <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                                 <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#9CA3AF" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}km`} />
+                                <YAxis stroke="#ffffff" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}km`} />
                                 <Tooltip cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} contentStyle={{ background: '#0A0F24', border: '1px solid #334155', borderRadius: '0.5rem' }} />
                                 <Bar dataKey="distance" radius={[4, 4, 0, 0]}>
                                     {chartData.map((entry, index) => (
