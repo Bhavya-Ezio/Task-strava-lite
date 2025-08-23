@@ -108,7 +108,7 @@ export default function RootLayout({
                     {/* Conditionally render Navbar based on user auth and page */}
                     <UserProvider>
                       <AuthGate>
-                        {pathname !== '/login' && pathname !== '/signup' && !pathname.includes("profile") && !pathname.includes("activity") && <Navbar />}
+                        {pathname !== '/login' && pathname !== '/signup' && !pathname.includes("profile") && !pathname.includes("addActivity") && !pathname.includes("activity") && <Navbar />}
                         {children}
                       </AuthGate>
                     </UserProvider>
