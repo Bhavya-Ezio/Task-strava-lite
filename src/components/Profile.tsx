@@ -7,19 +7,8 @@ import { logout } from '@/app/action';
 import { useRouter } from 'next/navigation'; // <-- Use next/navigation for app router
 import { useToast } from "@/toast/ToastProvider";
 import { useUser } from '@/context/userContext';
-// --- TYPE DEFINITION (matches API response) ---
-type UserProfileData = {
-    id: string;
-    name: string;
-    email: string;
-    memberSince: string;
-    allTimeStats: {
-        totalActivities: number;
-        totalDistance: number;
-        totalDuration: number;
-        avgSpeed: number;
-    };
-};
+import { UserProfileData } from '@/types/types';
+
 
 // --- HELPER FUNCTIONS ---
 const formatMemberSince = (dateString: string) =>

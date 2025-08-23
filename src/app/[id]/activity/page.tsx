@@ -9,17 +9,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useActiveTab } from "@/context/activeTabContext";
 import { useToast } from '@/toast/ToastProvider';
-
-// --- DATA TYPE ---
-type Activity = {
-    id: string;
-    title: string | null;
-    type: 'run' | 'ride';
-    distance_km: number | null;
-    duration_min: number | null;
-    created_at: string;
-    notes?: string;
-};
+import { Activity } from '@/types/types';
 
 // --- HELPER FUNCTIONS ---
 const formatFullDate = (dateString: string) => new Date(dateString).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' });

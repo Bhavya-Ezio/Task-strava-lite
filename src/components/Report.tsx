@@ -8,26 +8,7 @@ import {
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useUser } from '@/context/userContext';
-
-// --- TYPE DEFINITION (matches API response) ---
-type WeeklyReportData = {
-    reportId: string;
-    dateRange: { start: string; end: string; };
-    summaryMetrics: {
-        totalDistance: number; totalActivities: number; avgDistance: number;
-        avgSpeed: number; avgDuration: number; longestDistance: number; longestDuration: number;
-    };
-    goalProgress: { current: number; goal: number; };
-    weeklyActivities: {
-        id: string; title: string; type: 'run' | 'ride'; date: string;
-        distance: number; duration: number; speed: number;
-    }[];
-    insights: { mostActiveDay: string; fastestActivity: string; consistency: string; };
-    comparisonToLastWeek: {
-        distanceChangePercent: number; activitiesChangeCount: number;
-        avgSpeedChange: number; avgDurationChange: number;
-    };
-};
+import { WeeklyReportData } from '@/types/types';
 
 // --- HELPER FUNCTIONS ---
 const formatDateRange = (start: string, end: string) => {

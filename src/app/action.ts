@@ -1,15 +1,9 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { LogoutResult, Profile, SignInResult, UpdateProfileResult } from '@/types/types';
 import { User } from '@supabase/supabase-js';
 
-export type ActionResult = {
-  ok: boolean;
-  message?: string | null;
-  user?: Profile;
-};
-
-export type UpdateProfileResult = ActionResult;
 export async function updateProfile(_prev: UpdateProfileResult | undefined, formData: FormData): Promise<UpdateProfileResult> {
   try {
     const id = String(formData.get('id') ?? '').trim();
@@ -41,7 +35,7 @@ export type UserAndProfileResult = {
   profile?: Profile | null;
 };
 
-export type SignInResult = ActionResult;
+
 export async function signIn(_prev: SignInResult | undefined, formData: FormData): Promise<SignInResult> {
   try {
     const email = String(formData.get('email') ?? '').trim();
@@ -63,8 +57,6 @@ export async function signIn(_prev: SignInResult | undefined, formData: FormData
   }
 }
 
-export type LogoutResult = ActionResult;
-
 export async function logout(): Promise<LogoutResult> {
   try {
     const supabase = await createClient();
@@ -79,31 +71,3 @@ export async function logout(): Promise<LogoutResult> {
     return { ok: false, message: err instanceof Error ? err.message : 'Unexpected error.' };
   }
 }
-
-export type Profile = {
-  id: string;
-  full_name: string | null;
-  bio: string | null;
-};
-
-export type DashboardActivity = {
-  id: string;
-  type: 'run' | 'ride';
-  distance_km: number;
-  duration_min: number;
-  notes: string;
-  title: string;
-  created_at: Date;
-};
-
-export type DashboardWeeklyReport = {
-  totalRun: number;
-  totalTime: number;
-  topSport: number;
-};
-
-export type Dashboard = {
-  ok: boolean;
-  recent: DashboardActivity[];
-  summary: DashboardWeeklyReport;
-};

@@ -5,7 +5,8 @@ import { useParams } from "next/navigation";
 import { useToast } from "@/toast/ToastProvider";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { updateProfile, type UpdateProfileResult } from "../../action";
+import { updateProfile } from "../../action";
+import { UpdateProfileResult } from "@/types/types";
 
 export default function ProfilePage() {
     const { id } = useParams();

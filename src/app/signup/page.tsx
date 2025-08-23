@@ -26,7 +26,7 @@ export default function SignupPage() {
                 showToast({ variant: 'error', title: 'Sign up failed', message: error.message ?? 'Something went wrong. Please try again.' });
             } else {
                 setSent(true);
-                showToast({ variant: 'success', title: 'Sign up successful', message: 'Check your email to confirm your account.' });
+                showToast({ variant: 'success', title: 'Sign up successful',message: ""});
                 if (data.user) {
                     router.push(`/login`);
                 }

@@ -1,8 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Strava Lite
 
-## Getting Started
+A lightweight fitness tracking web application that allows users to log activities, view their history, and receive AI-powered training suggestions. Built as a full-stack Next.js application with Supabase integration.
 
-First, run the development server:
+## 🏃‍♂️Features
+
+### Core Fetures
+
+* **Authentication** : Secure login via Supabase Auth (magic link or email/password)
+* **Activity Logging** : Record runs and rides with title, date, duration, distance, effort level, and notes
+* **Activity History** : View personal activity list in reverse chronological order with search and filtering
+* **AI Suggestions** : Get personalized training recommendations based on recent activity patterns
+* **Activity Management** : Edit and delete activities with optimistic UI updates
+* **User Profile** : Display current user info with avatar/email and sign-out functionalites.
+
+### Advanced Features
+
+* **Derived Statistics** : Automatic calculation of pace (min/km) and speed (km/h)
+* **Search & Filter** : Find activities by title, sport type, and date range
+* **Pagination** : Efficient data loading with paginated activity lists
+* **Weekly Summary** : Optional overview card showing total distance, average duration, and top sport
+* **Soft Delete** : Activities are archived rather than permanently deleted
+* **Personal Bests** : Track longest runs, fastest times, weekly distance records
+* **Rate Limiting** : Implement request throttling (60/min per user)
+* **Charts** : Weekly mileage visualization
+* **Advanced Analytics** : Trend analysis and performance insights
+
+## 🛠 Tech Stack
+
+* **Framework** : [Next.js 14](https://nextjs.org/) with App Router
+* **Language** : TypeScript
+* **Styling** : [Tailwind CSS](https://tailwindcss.com/)
+* **Database** : [Supabase](https://supabase.com/) (PostgreSQL with Row Level Security)
+* **Authentication** : Supabase Auth
+* **Validation** : [Zod](https://zod.dev/) for API input validation
+* **State Management** : Server Components + optional React Query
+* **AI Integration** : Custom AI suggestion engine
+* **Font** : [Geist](https://vercel.com/font) optimized with `next/font`
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+* Node.js 18+
+* npm/yarn/pnpm/bun
+* Supabase account and project
+* Gemini API Key(for AI suggestions)
+
+### Installation
+
+1. **Clone the repository:**
+
+```bash
+git clone https://github.com/Bhavya-Ezio/Task-strava-lite.git
+cd Task-strava-lite
+```
+
+2. **Install dependencies:**
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
+
+3. **Set up environment variables:**
+
+```bash
+cp sample.env .env.local
+```
+
+Add your Supabase configuration to `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+4. **Set up Supabase:**
+   * Create tables for activities with RLS policies
+   * Configure authentication providers
+   * Set up database schema
+5. **Run the development server:**
 
 ```bash
 npm run dev
@@ -14,23 +97,114 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+6. **Open [http://localhost:3000](http://localhost:3000/) to view the application**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+Task-strava-li
+src/
+├── app/
+│   ├── api/
+│   │   ├── activities/
+│   │   │   ├── route.ts          # GET, POST activities
+│   │   │   └── [id]/route.ts     # PATCH, DELETE specific activity
+│   │   └── suggest/route.ts      # AI suggestions endpoint
+│   ├── auth/                     # Authentication pages
+│   ├── dashboard/                # Main application pages
+│   ├── page.tsx                  # Landing page
+│   ├── layout.tsx                # Root layout
+│   └── globals.css               # Global styles
+├── components/
+│   ├── ui/                       # Reusable UI components
+│   ├── ActivityForm.tsx          # Activity creation form
+│   ├── ActivityList.tsx          # Activity history display
+│   └── SuggestionCard.tsx        # AI suggestion display
+├── lib/
+│   ├── supabase/                 # Supabase client and utils
+│   ├── validations/              # Zod schemas
+│   └── utils.ts                  # Utility functions
+├── docs/
+│   └── ai-notes.md               # AI conversation logs
+├── types/                        # TypeScript type definitions
+└── public/                       # Static assets
+```
 
-## Learn More
+## 🔌 API Endpoints
 
-To learn more about Next.js, take a look at the following resources:
+### Activities
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+* `POST /api/activity` - Create new activity
+* `GET /api/activities` - Get paginated user activities with search/filter
+* `PATCH /api/activity/[id]` - Update existing activity
+* `DELETE /api/activity/[id]` - Soft delete activity
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### AI Suggestions
 
-## Deploy on Vercel
+* `POST /api/suggest` - Generate suggestion based on recent history
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Query Parameters (GET /api/activities)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+* `search` - Search by activity title
+* `sport` - Filter by sport type (Run/Ride)
+* `from` - Start date filter
+* `to` - End date filter
+* `page` - Page number for pagination
+* `pageSize` - Items per page
+
+## 🤖 AI Suggestions
+
+The AI suggestion system (using Gemini API) analyzes your recent activities (last 28 days) and provides personalized recommendations such as:
+
+* "Easy 5K today for active recovery"
+* "Time for a recovery ride - 45 min easy pace"
+* "You're ready for a longer run this weekend"
+
+Suggestions include rationale and are based on:
+
+* Recent training volume
+* Activity frequency
+* Effort levels
+* Recovery patterns
+
+## 🔒 Security Features
+
+* **Row Level Security (RLS)** : Database-level access control
+* **Token Validation** : Server-side verification of Supabase tokens
+* **Input Validation** : Zod schemas for API request validation
+* **No Client Secrets** : All sensitive keys stored server-side
+* **Ownership Checks** : Users can only access their own data
+
+## 🎨 UI/UX Features
+
+* **Responsive Design** : Mobile-first approach with Tailwind CSS
+* **Loading States** : Loaders and progress indicators
+* **Error Handling** : User-friendly error messages and fallbacks
+* **Optimistic Updates** : Immediate UI feedback for better UX
+* **Empty States** : Helpful guidance when no data is available
+* **Accessibility** : WCAG compliant with proper ARIA labels
+
+## 📊 Data Flow
+
+1. **Authentication** : User signs in via Supabase Auth
+2. **Activity Creation** : Form submission → API validation → Database storage
+3. **Data Fetching** : Client requests → Token validation → RLS-filtered queries
+4. **AI Processing** : Recent activities → Analysis → Personalized suggestions
+
+## 🧪 Testing
+
+## End-to-End (E2E) Testing
+
+This project uses **Cypress** for end-to-end testing.
+
+1. Install dependencies (if not already done):
+
+```bash
+npm install
+```
+
+2. Then run:
+
+```bash
+npm run test:e2e
+```

@@ -1,18 +1,20 @@
+import { UserAndProfileResult } from '@/app/action';
 import { createClient } from '@/lib/supabase/server';
+import { Profile } from '@/types/types';
 import { NextResponse } from 'next/server';
 
 // Define the shape of the expected response.
-export type Profile = {
-	id: string;
-	full_name: string | null;
-	bio: string | null;
-};
+// export type Profile = {
+// 	id: string;
+// 	full_name: string | null;
+// 	bio: string | null;
+// };
 
-export type UserAndProfileResult = {
-	ok: boolean;
-	message?: string | null;
-	profile?: Profile | null
-};
+// export type UserAndProfileResult = {
+// 	ok: boolean;
+// 	message?: string | null;
+// 	profile?: Profile | null
+// };
 
 export async function GET(): Promise<NextResponse<UserAndProfileResult>> {
 	try {

@@ -5,16 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Footprints, Bike, Pencil, Search, BarChart2, Loader2, AlertTriangle, ArrowRight } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import { useToast } from '@/toast/ToastProvider';
+import { Activity } from '@/types/types';
 
-// --- TYPE DEFINITIONS ---
-type Activity = {
-    id: string;
-    title: string | null;
-    type: 'run' | 'ride';
-    distance_km: number | null;
-    duration_min: number | null;
-    created_at: string;
-};
 
 const ITEMS_PER_PAGE = 10;
 

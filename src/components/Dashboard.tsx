@@ -1,12 +1,13 @@
 "use client";
 
-import { Dashboard } from "../app/action";
+// import { Dashboard } from "../app/action";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow, isToday, isYesterday } from "date-fns";
 import { useActiveTab } from "@/context/activeTabContext";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRef } from "react";
+import { Dashboard } from "@/types/types";
 
 const AiSuggestion = dynamic(() => import("./Suggestion"), { ssr: false });
 

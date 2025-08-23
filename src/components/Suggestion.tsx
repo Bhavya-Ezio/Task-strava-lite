@@ -3,16 +3,7 @@
 import React, { useState } from "react";
 import { BrainCircuit, Loader2 } from "lucide-react";
 import { useToast } from "@/toast/ToastProvider";
-
-// --- TYPE DEFINITION for the API response ---
-type SuggestionResponse = {
-    suggestion: string;
-    rationale: string;
-    inputs: {
-        totals: { distance: number; duration: number; activities: number };
-        averages: { distance: number; duration: number };
-    };
-};
+import { SuggestionResponse } from "@/types/types";
 
 // --- MAIN COMPONENT ---
 const AiSuggestion = () => {

@@ -5,22 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Footprints, Bike, PlusCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/toast/ToastProvider';
 import { useActiveTab } from '@/context/activeTabContext';
-// --- TYPE for form data ---
-type ActivityFormData = {
-    type: 'run' | 'ride' | '';
-    title: string;
-    distance_km: string;
-    duration_min: string;
-    notes: string;
-};
-
-type FormDataError = {
-    type: string;
-    title: string;
-    distance_km: string;
-    duration_min: string;
-    notes: string;
-};
+import { ActivityFormData, FormDataError } from "@/types/types";
 
 // --- MAIN COMPONENT ---
 const AddActivityPage = () => {

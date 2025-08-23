@@ -1,15 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from "@/lib/supabase/server";
-
-type Activity = {
-    id: string;
-    title: string | null;
-    type: 'run' | 'ride';
-    distance_km: number | null;
-    duration_min: number | null;
-    created_at: string;
-    notes?: string;
-};
+import { Activity } from '@/types/types';
 
 export async function GET(request: Request) {
     try {

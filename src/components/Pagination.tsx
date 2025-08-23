@@ -1,13 +1,7 @@
 "use client";
 
+import { PaginationProps } from '@/types/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-type PaginationProps = {
-    totalItems: number;
-    itemsPerPage: number;
-    currentPage: number;
-    onPageChange: (page: number) => void;
-};
 
 const Pagination = ({ totalItems, itemsPerPage, currentPage, onPageChange }: PaginationProps) => {
     const totalPages = Math.ceil(totalItems / itemsPerPage);

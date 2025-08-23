@@ -7,8 +7,9 @@ import { useToast } from '@/toast/ToastProvider';
 import { useRouter } from 'next/navigation';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { signIn, type SignInResult } from '@/app/action';
+import { signIn } from '@/app/action';
 import { useUser } from '@/context/userContext';
+import { SignInResult } from '@/types/types';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');

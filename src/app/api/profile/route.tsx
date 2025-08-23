@@ -1,26 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
+import { ProfileRes, UserProfileData } from '@/types/types';
 import { NextResponse } from 'next/server';
-
-// Define the shape of the expected response.
-type UserProfileData = {
-    id: string;
-    name: string;
-    email: string;
-    memberSince: string;
-    allTimeStats: {
-        totalActivities: number;
-        totalDistance: number;
-        totalDuration: number;
-        avgSpeed: number;
-    };
-};
-
-
-export type ProfileRes = {
-    ok: boolean;
-    message?: string | null;
-    profile?: UserProfileData | null
-};
 
 export async function GET(): Promise<NextResponse<ProfileRes>> {
     try {
