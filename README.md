@@ -34,7 +34,7 @@ A lightweight fitness tracking web application that allows users to log activiti
 * **Authentication** : Supabase Auth
 * **Validation** : [Zod](https://zod.dev/) for API input validation
 * **State Management** : Server Components + optional React Query
-* **AI Integration** : Custom AI suggestion engine
+* **AI Integration** : Custom AI suggestion
 * **Font** : [Geist](https://vercel.com/font) optimized with `next/font`
 
 ## 🚀 Getting Started
@@ -151,7 +151,7 @@ src/
 
 ### AI Suggestions
 
-* `POST /api/suggest` - Generate suggestion based on recent history
+* `POST /api/suggestion` - Generate suggestion based on recent history
 
 ### Query Parameters (GET /api/activities)
 
@@ -205,7 +205,7 @@ Suggestions include rationale and are based on:
 
 ## End-to-End (E2E) Testing
 
-This project uses **Cypress** for end-to-end testing.
+This project uses **Playwright** for end-to-end testing.
 
 1. Install dependencies (if not already done):
 
