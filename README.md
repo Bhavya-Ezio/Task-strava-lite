@@ -78,7 +78,6 @@ Add your Supabase configuration to `.env.local`:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
@@ -103,32 +102,42 @@ bun dev
 ## 📁 Project Structure
 
 ```
-Task-strava-li
+Task-strava-lite/
+├── docs/ (or ai-notes/)           # Dev notes, AI conversations
+├── tests/                         # Playwright & other tests
 src/
 ├── app/
+│   ├── addActivity/             
 │   ├── api/
-│   │   ├── activities/
-│   │   │   ├── route.ts          # GET, POST activities
-│   │   │   └── [id]/route.ts     # PATCH, DELETE specific activity
-│   │   └── suggest/route.ts      # AI suggestions endpoint
-│   ├── auth/                     # Authentication pages
-│   ├── dashboard/                # Main application pages
-│   ├── page.tsx                  # Landing page
-│   ├── layout.tsx                # Root layout
-│   └── globals.css               # Global styles
+│   │   ├── activities/route.ts       # GET all, POST new
+│   │   ├── activities/[id]/route.ts  # GET one, PATCH, DELETE
+│   │   ├── dashboard/route.ts
+│   │   ├── getReport/route.ts
+│   │   ├── profile/route.ts
+│   │   ├── user/route.ts
+│   │   └── suggestion/route.ts
+│   ├── login/
+│   ├── signup/
+│   ├── dashboard/
+│   ├── action.ts
+│   ├── page.tsx
+│   ├── layout.tsx
+│   └── globals.css
 ├── components/
-│   ├── ui/                       # Reusable UI components
-│   ├── ActivityForm.tsx          # Activity creation form
-│   ├── ActivityList.tsx          # Activity history display
-│   └── SuggestionCard.tsx        # AI suggestion display
+│   ├── Activities/
+│   ├── Dashboard/
+│   ├── Navbar/
+│   ├── Profile/
+│   ├── Report/
+│   └── Suggestion/
+├── context/
+│   ├── UserContext.tsx
+│   └── ActiveTabContext.tsx
 ├── lib/
-│   ├── supabase/                 # Supabase client and utils
-│   ├── validations/              # Zod schemas
-│   └── utils.ts                  # Utility functions
-├── docs/
-│   └── ai-notes.md               # AI conversation logs
-├── types/                        # TypeScript type definitions
-└── public/                       # Static assets
+│   └── supabase/
+├── types/
+└── public/
+
 ```
 
 ## 🔌 API Endpoints
