@@ -19,7 +19,7 @@ const formatTotalTime = (totalMinutes: number) => {
     return `${hours}h ${minutes}m`;
 };
 const getInitials = (name: string) => {
-    const names = name.split(' ');
+    const names = name?.split(' ');
     if (names.length > 1) {
         return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
     }
